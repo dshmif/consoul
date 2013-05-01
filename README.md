@@ -12,7 +12,7 @@ The commands currently supported are simple synchronous commands. Which is to sa
 prompt isn't provided again until the command completes execution successfully or otherwise. It also provides
 password-protected commands (sudo). I still need to get background (async) commands implemented but the two supported
 command types have handled everything I've needed to date (which is probably why async commands are still missing)
-so it may be a bit before asyc commands drop.
+so it may be a bit before async commands drop.
 
 Like most developers I have to be threatened with broken bones to write documentation but I'll try and get some
 framework documentation up "soon".
