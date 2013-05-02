@@ -30,6 +30,7 @@ import java.util.Set;
 import com.abstractthis.consoul.ApplicationContext;
 import com.abstractthis.consoul.commands.command.Command;
 import com.abstractthis.consoul.commands.command.ContextAwareCommand;
+import com.abstractthis.consoul.commands.command.SecureCommand;
 import com.abstractthis.consoul.commands.exception.CommandInitException;
 import com.abstractthis.consoul.commands.exception.CommandNotFoundException;
 
@@ -69,6 +70,7 @@ public final class CommandContainer {
 			}
             Class<?> cmdClass = Class.forName(className);
             Command cmd = (Command)cmdClass.newInstance();
+            this.verifyProperCommandType(cmdDef, cmd);
             if( cmd instanceof ContextAwareCommand ) {
             	((ContextAwareCommand) cmd).setContext(context);
             }
@@ -83,6 +85,20 @@ public final class CommandContainer {
         catch(InstantiationException iEx) {
             throw new CommandInitException(CMD_CREATION_FAILED, iEx);
         }
+	}
+	
+	private void verifyProperCommandType(CommandDefinition cmdDef, Command cmd)
+			throws CommandInitException {
+		if( cmdDef.isSecure() && !(cmd instanceof SecureCommand) ) {
+			String errMsg = String.format("%s [%s] defined as secure but not implemented as such.",
+					cmdDef.getName(), cmdDef.getImplClassName());
+			throw new CommandInitException(errMsg);
+		}
+		else if( cmdDef.isContextAware() && !(cmd instanceof ContextAwareCommand)) {
+			String errMsg = String.format("%s [%s] defined as contextAware but not implemented as such.",
+					cmdDef.getName(), cmdDef.getImplClassName());
+			throw new CommandInitException(errMsg);
+		}
 	}
 	
 	public String[] getSupportedCommandNames() {
