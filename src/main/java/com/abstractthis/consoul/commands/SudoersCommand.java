@@ -26,6 +26,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.Set;
 
 import com.abstractthis.consoul.ApplicationContext;
@@ -35,9 +36,11 @@ import com.abstractthis.consoul.commands.command.ContextAwareCommand;
 import com.abstractthis.consoul.commands.command.SecureCommand;
 import com.abstractthis.consoul.commands.exception.CommandPerformException;
 import com.abstractthis.consoul.ini.ConsoleInitializer;
-import com.abstractthis.consoul.widgets.SudoWidget;
+import com.abstractthis.consoul.util.BCrypt;
 
 public class SudoersCommand implements SecureCommand, ContextAwareCommand {
+	private static final String PROMPT_FOR_USERNAME = "User:";
+	private static final String PROMPT_FOR_PASSWORD = "Password:";
 	
 	private ApplicationContext context;
 
@@ -62,8 +65,9 @@ public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 		BufferedWriter bw = null;
 		try {
 			bw = new BufferedWriter(new FileWriter(new File(SUDOER_FILE_PATH), true));
-			String newSudoer = context.removeCurrentSudoer();
-			bw.write(newSudoer);
+			String[] cmdArgs = command.getCommandArguments();
+			String newSudoerHash = BCrypt.hashpw(cmdArgs[0] + cmdArgs[1], BCrypt.gensalt(12));
+			bw.write(newSudoerHash);
 			bw.write(',');
 			bw.flush();
 			// Add the new sudoer to the context stored sudoer list
@@ -72,11 +76,11 @@ public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 					(ContextVariable<Set<String>>) context.get(
 							ConsoleInitializer.getInitializer().getSudoersPropKey());
 			Set<String> ctxtSudoers = ctxtSudoersSet.getContent();
-			ctxtSudoers.add(newSudoer);
+			ctxtSudoers.add(newSudoerHash);
 			out.sendAndFlush("user added to sudoers list.");
 		}
 		catch(IOException ioe) {
-			throw new CommandPerformException("Failed to add user to sudoers list!");
+			throw new CommandPerformException("Failed to add user to sudoers list!", ioe);
 		}
 		finally {
 			try { if( bw != null ) { bw.close(); } }
@@ -97,12 +101,18 @@ public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 	}
 
 	public CommandCreds promptForCredentials(ConsoleOutPipe out) {
-		out.displayWidget(new SudoWidget(this.context));
-		return null;
+		out.useNewline(false);
+		out.sendAndFlush(PROMPT_FOR_USERNAME);
+		Scanner inputScan = new Scanner(System.in);
+		String username = inputScan.nextLine();
+		out.sendAndFlush(PROMPT_FOR_PASSWORD);
+		String password = inputScan.nextLine();
+		out.useNewline(true);
+		return new CommandCreds(username, password);
 	}
 
 	public boolean verifyCredentials(CommandCreds creds) {
-		return context.isSudoer();
+		return this.context.isSudoer(creds);
 	}
 
 }
