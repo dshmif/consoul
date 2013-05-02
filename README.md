@@ -10,7 +10,7 @@ telling the implementation to execute itself.
 
 The commands currently supported are simple synchronous commands. Which is to say that you enter a command and a
 prompt isn't provided again until the command completes execution successfully or otherwise. It also provides
-password-protected commands (sudo). I still need to get background (async) commands implemented but the two supported
+password-protected commands (sudo-ish). I still need to get background (async) commands implemented but the two supported
 command types have handled everything I've needed to date (which is probably why async commands are still missing)
 so it may be a bit before async commands drop.
 
