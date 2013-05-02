@@ -32,7 +32,7 @@ public class BusyWidget extends AbstractHijackWidget {
 	}
 	
 	public BusyWidget(long delayMillis) {
-		super();
+		super(false);
 		DELAY_MILLISECONDS = delayMillis;
 	}
 
