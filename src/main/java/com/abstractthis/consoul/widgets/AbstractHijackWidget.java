@@ -28,12 +28,13 @@ public abstract class AbstractHijackWidget implements DisplayHijackWidget {
 	private PrintStream renderStream;
 	private Thread renderThread;
 	
-	public AbstractHijackWidget() {
+	public AbstractHijackWidget(final boolean isSinglePass) {
 		renderThread = new Thread(new Runnable() {
 			public void run() {
 				try {
 					while( !Thread.currentThread().isInterrupted() ) {
 						AbstractHijackWidget.this.hijackRender(renderStream);
+						if( isSinglePass ) break;
 					}
 				}
 				catch(InterruptedException ignored) {
