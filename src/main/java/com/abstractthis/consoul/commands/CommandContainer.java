@@ -64,10 +64,10 @@ public final class CommandContainer {
 	throws CommandInitException, CommandNotFoundException {
 		try {
 			CommandDefinition cmdDef = commands.get(cmdName);
-			String className = cmdDef.getImplClassName();
-			if( className == null ) {
+			if( cmdDef == null ) {
 				throw new CommandNotFoundException(CMD_CLASS_NOT_FOUND);
 			}
+			String className = cmdDef.getImplClassName();
             Class<?> cmdClass = Class.forName(className);
             Command cmd = (Command)cmdClass.newInstance();
             this.verifyProperCommandType(cmdDef, cmd);
