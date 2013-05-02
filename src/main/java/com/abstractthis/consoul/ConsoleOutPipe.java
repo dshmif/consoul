@@ -81,6 +81,17 @@ public final class ConsoleOutPipe {
 	}
 	
 	/**
+	 * The specified single character will be sent to the display
+	 * for rendering.
+	 * @param c
+	 * @return this <code>ConsoleOutPipe</code> for chaining
+	 */
+	public ConsoleOutPipe sendAndFlushChar(char c) {
+		display.render(c);
+		return this;
+	}
+	
+	/**
 	 * Tells the output to append a newline to the output or not.
 	 * @param yesNo true if the output appends a newline
 	 */
