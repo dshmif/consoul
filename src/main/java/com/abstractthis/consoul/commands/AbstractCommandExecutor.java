@@ -53,7 +53,8 @@ public abstract class AbstractCommandExecutor {
 		                                                      "command:listProperties",
 		                                                      "command:getProp",
 		                                                      "command:getProperty",
-		                                                      "command:sudoers"};
+		                                                      "command:sudoers",
+		                                                      "command:clear"};
 	private CommandContainer supportedCmds;
 	
 	public void destroy() { /* Nothing happens by default */ }
@@ -155,6 +156,9 @@ public abstract class AbstractCommandExecutor {
 			// its implementation and that it's ContextAware.
 			((ContextAwareCommand) cmd).setContext(
 					command.getApplicationContext());
+		}
+		else if( cmdName.endsWith("clear") ) {
+			cmd = new ClearCommand();
 		}
 		return cmd;
 	}
