@@ -28,6 +28,7 @@ import com.abstractthis.consoul.ApplicationContext;
 import com.abstractthis.consoul.ConsoleException;
 import com.abstractthis.consoul.ConsoleOutPipe;
 import com.abstractthis.consoul.commands.command.Command;
+import com.abstractthis.consoul.commands.command.ContextAwareCommand;
 import com.abstractthis.consoul.commands.command.SecureCommand;
 import com.abstractthis.consoul.commands.exception.CommandInitException;
 import com.abstractthis.consoul.commands.exception.CommandNotFoundException;
@@ -110,6 +111,14 @@ public abstract class AbstractCommandExecutor {
 			ConsoleOutPipe outPipe = command.getCommandOutputPipe();
 			outPipe.sendAndFlush("Unexpected error trying to execute command " + command.getCommandName());
 		}
+		catch(RuntimeException re) {
+			ConsoleOutPipe outPipe = command.getCommandOutputPipe();
+			outPipe.sendAndFlush("BOOM! Consoul spirit has flown...things may no longer work.");
+			outPipe.sendAndFlush("Ctrl-C might be in your future...");
+			for(StackTraceElement ste : re.getStackTrace()) {
+				outPipe.sendAndFlush(ste.toString());
+			}
+		}
 	}
 	
 	private boolean isInternalCommand(ConsoleCommand command) {
@@ -142,6 +151,10 @@ public abstract class AbstractCommandExecutor {
 		}
 		else if( cmdName.endsWith("sudoers") ) {
 			cmd = new SudoersCommand();
+			// Since SudoersCommand is an internal command we know about
+			// its implementation and that it's ContextAware.
+			((ContextAwareCommand) cmd).setContext(
+					command.getApplicationContext());
 		}
 		return cmd;
 	}
