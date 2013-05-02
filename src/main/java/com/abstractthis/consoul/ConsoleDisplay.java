@@ -78,6 +78,13 @@ final class ConsoleDisplay {
 		catch(RejectedExecutionException ignored) {}
 	}
 	
+	public void render(char c) {
+		try {
+			outputExec.submit(new CharOutputTask(c));
+		}
+		catch(RejectedExecutionException ignored) {}
+	}
+	
 	public void render(String output, boolean useNewline) {
 		try {
 			outputExec.submit(new StringOutputTask(output, useNewline));
@@ -127,6 +134,19 @@ final class ConsoleDisplay {
 			ConsoleCommand cmd = ConsoleDisplay.this.inputParser.parse(input);
 			if( cmd != null ) ConsoleDisplay.this.app.executeCommand(cmd);
 			else ConsoleDisplay.this.render(new PromptWidget(ConsoleDisplay.this));
+			return null;
+		}
+	}
+	
+	private static class CharOutputTask implements Callable<Void> {
+		private final char ch;
+		
+		public CharOutputTask(char c) {
+			this.ch = c;
+		}
+		
+		public Void call() throws Exception {
+			System.out.print(ch);
 			return null;
 		}
 	}
