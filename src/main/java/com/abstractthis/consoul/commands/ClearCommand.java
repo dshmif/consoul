@@ -17,27 +17,12 @@ public class ClearCommand implements Command {
 	}
 
 	public void perform(ConsoleCommand command) throws CommandPerformException {
-//		boolean isWindows = this.isSystemWindows();
-//		String nativeClearCommand = isWindows ? "cls" : "clear";
-//		try {
-//			System.err.println("OS: " + OS_NAME);
-//			System.err.println("Command: " + nativeClearCommand);
-//			Process p = Runtime.getRuntime().exec(nativeClearCommand);
-//			p.destroy();
-//		}
-//		catch(IOException ioe) {
-//			throw new CommandPerformException("Unable to clear the terminal!");
-//		}
 		// ANSI Escape Sequence support is required for this to work
 		ConsoleOutPipe out = command.getCommandOutputPipe();
 		out.useNewline(false);
 		out.sendAndFlush(ESC + "2J");
 		out.useNewline(true);
 	}
-	
-//	private boolean isSystemWindows() {
-//		return OS_NAME.startsWith("Windows");
-//	}
 
 	public boolean verifyArguments(String[] cmdArgs) {
 		return cmdArgs.length == 0;
