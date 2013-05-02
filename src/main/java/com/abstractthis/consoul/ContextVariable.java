@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 public class ContextVariable<T> {
-	private AtomicReference<T> varRef;
+	private AtomicReference<T> varRef = new AtomicReference<T>();
 	
 	public ContextVariable() {
 		// Default creates an empty variable
