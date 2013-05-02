@@ -22,6 +22,9 @@ package com.abstractthis.consoul;
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //THE SOFTWARE.
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -108,22 +111,23 @@ public final class ConsoleApplication {
 	
 	private String getSudoerHashes() {
 		final String SUDOER_FILE_PATH = ConsoleInitializer.getInitializer().getSudoersPath();
-		final InputStream is = ClassLoader.getSystemResourceAsStream(SUDOER_FILE_PATH);
-		if( is != null ) {
-			final Properties sudoers = new Properties();
-			try {
-				sudoers.load(is);
-				return sudoers.getProperty(ConsoleInitializer.getInitializer().getSudoersPropKey());
-			}
-			catch(IOException ioe) {
-				throw new InitializerException(ioe);
-			}
-			finally {
-				try { is.close(); }
-				catch(IOException ioe2) { /* NOP */}
-			}
+		final Properties sudoers = new Properties();
+		InputStream is = null;
+		try {
+			is = new FileInputStream(new File(SUDOER_FILE_PATH));
+			sudoers.load(is);
+			return sudoers.getProperty(ConsoleInitializer.getInitializer().getSudoersPropKey());
 		}
-		return "";
+		catch(FileNotFoundException file404Ex) {
+			throw new InitializerException("Couldn't find the sudoers file.");
+		}
+		catch(IOException ioe) {
+			throw new InitializerException(ioe);
+		}
+		finally {
+			try { is.close(); }
+			catch(IOException ioe2) { /* NOP */}
+		}
 	}
 	
 	/**
@@ -175,7 +179,7 @@ public final class ConsoleApplication {
 		else {
 			try {
 				cmdExeService.submit(
-						new CommandExeTask(context,
+						new CommandExeTask(this.context,
 								           this.display,
 								           this.cmdExecutor,
 								           command));
