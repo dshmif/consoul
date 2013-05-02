@@ -41,6 +41,7 @@ import com.abstractthis.consoul.util.BCrypt;
 public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 	private static final String PROMPT_FOR_USERNAME = "User:";
 	private static final String PROMPT_FOR_PASSWORD = "Password:";
+	private static final String NEW_LINE = System.getProperty("line.separator");
 	
 	private ApplicationContext context;
 
@@ -59,6 +60,9 @@ public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 	}
 
 	public void perform(ConsoleCommand command) throws CommandPerformException {
+		// Clear the terminal to stop shoulder surfers while we aren't masking
+		// the password. Enhancement ticket will be issued.
+		this.clearTerminalAfterPasswordEntered(command);
 		final String SUDOER_FILE_PATH = ConsoleInitializer.getInitializer().getSudoersPath();
 		ConsoleOutPipe out = command.getCommandOutputPipe();
 		out.sendAndFlush("Adding user to the sudoers list...");
@@ -87,6 +91,19 @@ public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 			catch(IOException ioe2) { /* NOP */ }
 		}
 	}
+	
+	private void clearTerminalAfterPasswordEntered(ConsoleCommand command) {
+		try {
+			ConsoleCommand clearCmd =
+					new DefaultConsoleCommand("command:clear", new String[0]);
+			clearCmd.setCommandOutputPipe(command.getCommandOutputPipe());
+			new ClearCommand().perform(clearCmd);
+		}
+		catch(CommandPerformException cpe) {
+			// NOP because if the screen didn't clear not much we can do
+			// and the ClearCommand doesn't actually throw anything.
+		}
+	}
 
 	public boolean verifyArguments(String[] cmdArgs) {
 		return cmdArgs.length == 2;
@@ -104,11 +121,33 @@ public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 		out.useNewline(false);
 		out.sendAndFlush(PROMPT_FOR_USERNAME);
 		Scanner inputScan = new Scanner(System.in);
-		String username = inputScan.nextLine();
+		inputScan.useDelimiter("");
+		String username = this.captureInput(inputScan);
 		out.sendAndFlush(PROMPT_FOR_PASSWORD);
-		String password = inputScan.nextLine();
+		String password = this.captureInput(inputScan);
 		out.useNewline(true);
 		return new CommandCreds(username, password);
+	}
+	
+	/*
+	 * Helper method that reads in each character as it's typed and then erases
+	 * it by omitting a backspace if <code>maskIt</code> is specified as true.
+	 * Once the systems newline character is detected the input is returned.
+	 * @param inputScan
+	 * @param out - (likely needed again in the future)
+	 * @param maskIt - (likely needed again in the future)
+	 * @return the input the user provided
+	 */
+	private String captureInput(Scanner inputScan) {
+		StringBuilder input = new StringBuilder(16);
+		while( inputScan.hasNext() ) {
+			String s = inputScan.next();
+			if( s.equals(NEW_LINE) ) {
+				return input.toString();
+			}
+			input.append(s);
+		}
+		return "";
 	}
 
 	public boolean verifyCredentials(CommandCreds creds) {
