@@ -26,28 +26,33 @@ import java.io.PrintStream;
 import java.util.Scanner;
 
 import com.abstractthis.consoul.ApplicationContext;
-import com.abstractthis.consoul.util.BCrypt;
+import com.abstractthis.consoul.commands.CommandCreds;
 
-public class SudoWidget implements Widget {
+public class SudoWidget extends AbstractHijackWidget {
 	private static final String PROMPT_FOR_USERNAME = "User:";
 	private static final String PROMPT_FOR_PASSWORD = "Password:";
 	
 	private ApplicationContext context;
 	
 	public SudoWidget(ApplicationContext context) {
+		super(true);
 		this.context = context;
 	}
 
-	public void render(PrintStream stream) {
+	// Because of the fact that widgets are rendered to the display
+	// in a separate thread a blocking widget implementation needs
+	// to be implemented for this to be useful. For now implement
+	// directly in SecureCommand.promptForCredentials. Look at
+	// SudoersCommand for an example.
+	public void hijackRender(PrintStream stream) {
 		stream.print(PROMPT_FOR_USERNAME);
 		Scanner inputScan = new Scanner(System.in);
 		String username = inputScan.nextLine();
 		stream.print(PROMPT_FOR_PASSWORD);
 		String password = inputScan.nextLine();
-		String echo = String.format("User: %s    Password: %s", username, password);
-		String hash = BCrypt.hashpw(username + password, BCrypt.gensalt(12));
-		context.setCurrentSudoer(hash);
-		stream.print(echo);
+		String msg = String.format("Widget User: %s Widget Password: %s", username, password);
+		System.err.println(msg);
+		context.setCurrentSudoer(new CommandCreds(username, password));
 	}
 
 }
