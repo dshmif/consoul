@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -48,7 +46,7 @@ public final class ConsoleInitializer {
 	private static final List<String[]> SUDOERS = new ArrayList<String[]>();
 	private static final String INI_FILE_PATH = "CONSOLE-INI/console.xml";
 	private static final String INI_PROP_FILE_PATH = "CONSOLE-INI/console.properties";
-	private static final String SUDOERS_FILE_PATH = "com/abstractthis/consoul/ini/sudoers";
+	private static final String SUDOERS_FILE_PATH = System.getProperty("user.dir") + "/sudoers";
 	private static final String SUDOERS_PROP_KEY = "com.abstractthis.consoul.sudoers";
 	private static final Properties INI_PROPS = new Properties();
 	private static String applicationTitle;
@@ -178,24 +176,20 @@ public final class ConsoleInitializer {
 	}
 	
 	private void initSudoerFile() {
-		URL sudoerFileUrl = ClassLoader.getSystemResource(SUDOERS_FILE_PATH);
-		if( sudoerFileUrl == null ) {
-			Package thisClazzPackage = ConsoleInitializer.class.getPackage();
-			String packageDotPath = thisClazzPackage.getName();
-			String packagePath = packageDotPath.replace(".", "/");
-			sudoerFileUrl = ClassLoader.getSystemResource(packagePath);
-			boolean sudoerFileCreated = this.createSudoerFile(sudoerFileUrl);
+		boolean sudoersFileExists = new File(SUDOERS_FILE_PATH).exists();
+		if( !sudoersFileExists ) {
+			boolean sudoerFileCreated = this.createSudoerFile();
 			if ( !sudoerFileCreated ) {
 				throw new InitializerException("Failed to create sudoer file!");
 			}
 		}
 	}
 	
-	private boolean createSudoerFile(URL sudoerFileUrl) {
+	private boolean createSudoerFile() {
 		boolean createSuccess = true;
 		BufferedWriter bw = null;
 		try {
-			File sudoersFile = new File(sudoerFileUrl.toURI() + "/sudoers");
+			File sudoersFile = new File(SUDOERS_FILE_PATH);
 			bw = new BufferedWriter(new FileWriter(sudoersFile, true));
 			bw.write(SUDOERS_PROP_KEY);
 			bw.write("=");
@@ -208,9 +202,6 @@ public final class ConsoleInitializer {
 			bw.flush();
 			return createSuccess;
 			
-		}
-		catch(URISyntaxException uriEx) {
-			createSuccess = false;
 		}
 		catch(IOException ioe) {
 			createSuccess = false;
