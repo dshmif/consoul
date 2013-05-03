@@ -165,6 +165,11 @@ public abstract class AbstractCommandExecutor {
 		return cmd;
 	}
 	
+	private Command getInternalCommand(String commandName) {
+		return this.getInternalCommand(
+				new DefaultConsoleCommand(commandName, null));
+	}
+	
 	private Command getCommand(ConsoleCommand consoleCmd)
 	throws CommandInitException, CommandNotFoundException {
 		Command cmd = supportedCmds.getCommand(consoleCmd);
@@ -235,7 +240,9 @@ public abstract class AbstractCommandExecutor {
     		ConsoleOutPipe outPipe = command.getCommandOutputPipe();
     		try {
     			ApplicationContext ctxt = command.getApplicationContext();
-    			Command usageNeeded = AbstractCommandExecutor.this.getCommand(args[0], ctxt);
+    			Command usageNeeded = args[0].startsWith("command:") ?
+    					AbstractCommandExecutor.this.getInternalCommand(args[0]) :
+    						AbstractCommandExecutor.this.getCommand(args[0], ctxt);
     			outPipe.sendAndFlush("Usage: " + usageNeeded.getUsage());
     		}
     		catch(CommandInitException cie) {
@@ -267,7 +274,9 @@ public abstract class AbstractCommandExecutor {
     		ConsoleOutPipe outPipe = command.getCommandOutputPipe();
     		try {
     			ApplicationContext ctxt = command.getApplicationContext();
-    			Command manPageNeeded = AbstractCommandExecutor.this.getCommand(args[0], ctxt);
+    			Command manPageNeeded = args[0].startsWith("command:") ?
+    					AbstractCommandExecutor.this.getInternalCommand(args[0]) :
+    						AbstractCommandExecutor.this.getCommand(args[0], ctxt);
     			String manPage = manPageNeeded.getManual();
     			if( manPage == null || manPage.length() == 0 ) {
     				outPipe.sendAndFlush("No manual for " + args[0]);
