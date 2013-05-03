@@ -83,6 +83,8 @@ public abstract class AbstractCommandExecutor {
 						throw new CommandPerformException(
 								"Not Authorized to execute command: " + command.getCommandName());
 					}
+					// Hack until password masking is implemented
+					this.clearTerminalAfterPasswordEntered(command);
 					secCmd.perform(command);
 				}
 				// Standard command can just be executed
@@ -173,6 +175,19 @@ public abstract class AbstractCommandExecutor {
 	throws CommandInitException, CommandNotFoundException {
 		Command cmd = supportedCmds.getCommand(cmdName, context);
 		return cmd;
+	}
+	
+	private void clearTerminalAfterPasswordEntered(ConsoleCommand command) {
+		try {
+			ConsoleCommand clearCmd =
+					new DefaultConsoleCommand("command:clear", new String[0]);
+			clearCmd.setCommandOutputPipe(command.getCommandOutputPipe());
+			new ClearCommand().perform(clearCmd);
+		}
+		catch(CommandPerformException cpe) {
+			// NOP because if the screen didn't clear not much we can do
+			// and the ClearCommand doesn't actually throw anything.
+		}
 	}
 	
 	protected abstract void handleCommandPerformException(ConsoleCommand command, Throwable t);

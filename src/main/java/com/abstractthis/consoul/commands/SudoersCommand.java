@@ -60,9 +60,6 @@ public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 	}
 
 	public void perform(ConsoleCommand command) throws CommandPerformException {
-		// Clear the terminal to stop shoulder surfers while we aren't masking
-		// the password. Enhancement ticket will be issued.
-		this.clearTerminalAfterPasswordEntered(command);
 		final String SUDOER_FILE_PATH = ConsoleInitializer.getInitializer().getSudoersPath();
 		ConsoleOutPipe out = command.getCommandOutputPipe();
 		out.sendAndFlush("Adding user to the sudoers list...");
@@ -89,19 +86,6 @@ public class SudoersCommand implements SecureCommand, ContextAwareCommand {
 		finally {
 			try { if( bw != null ) { bw.close(); } }
 			catch(IOException ioe2) { /* NOP */ }
-		}
-	}
-	
-	private void clearTerminalAfterPasswordEntered(ConsoleCommand command) {
-		try {
-			ConsoleCommand clearCmd =
-					new DefaultConsoleCommand("command:clear", new String[0]);
-			clearCmd.setCommandOutputPipe(command.getCommandOutputPipe());
-			new ClearCommand().perform(clearCmd);
-		}
-		catch(CommandPerformException cpe) {
-			// NOP because if the screen didn't clear not much we can do
-			// and the ClearCommand doesn't actually throw anything.
 		}
 	}
 
