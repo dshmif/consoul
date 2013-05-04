@@ -203,7 +203,7 @@ public abstract class AbstractCommandExecutor {
     private class ListCommand implements Command {
     	
     	public String getManual() {
-    		return null;
+    		return "Lists all of the application defined commands available.";
     	}
     	
     	public String getUsage() {
@@ -228,7 +228,12 @@ public abstract class AbstractCommandExecutor {
     private class UsageCommand implements Command {
     	
     	public String getManual() {
-    		return null;
+    		StringBuilder manPage = new StringBuilder(128);
+    		manPage.append("Shows how the specified commands syntax.\n")
+    		       .append('\n')
+    		       .append("Parameters:\n")
+    		       .append("The name of the command to show the syntax of.");
+    		return manPage.toString();
     	}
     	
     	public String getUsage() {
@@ -262,7 +267,7 @@ public abstract class AbstractCommandExecutor {
     private class ManPageCommand implements Command {
     	
     	public String getManual() {
-    		return null;
+    		return "You know how to use it. You just did :-)";
     	}
     	
     	public String getUsage() {
