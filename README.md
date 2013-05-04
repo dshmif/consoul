@@ -6,7 +6,7 @@ again so I decided to roll a simple framework that allowed me to "quickly" get a
 The framework mimics your run-of-the-mill web application that leverages Servlets but instead of mapping a Servlet
 to a URL you map a command string to a Command implementation. Like most web application frameworks, to which Consoul
 mimics, a Front Controller is used to handle finding the correct mapped implementation and basic chores before
-telling the implementation to execute itself.
+telling the implementation to execute itself. Java 1.6 added Console API but this framework works wih 1.5 and higher.
 
 The commands currently supported are simple synchronous commands. Which is to say that you enter a command and a
 prompt isn't provided again until the command completes execution successfully or otherwise. It also provides
