@@ -61,6 +61,13 @@ import java.security.SecureRandom;
 * @author Damien Miller
 * @version 0.2
 */
+// I changed StringBuffer instances to StringBuilder and also
+// initialized them with an appropriate initial size. One of the
+// the largest performance killers is synchronization, which is
+// unneccesarily present in a StringBuffer and resizing of a backing
+// array. The default size of the StringBuilder and StringBuffer is
+// in adequate so time is wasted resizing it...potentially more than
+// once. - dshmif
 public class BCrypt {
 	// BCrypt parameters
 	private static final int GENSALT_DEFAULT_LOG2_ROUNDS = 10;
