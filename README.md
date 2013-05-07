@@ -14,7 +14,4 @@ password-protected commands (sudo-ish). I still need to get background (async) c
 command types have handled everything I've needed to date (which is probably why async commands are still missing)
 so it may be a bit before async commands drop.
 
-Like most developers I have to be threatened with broken bones to write documentation but I'll try and get some
-framework documentation up "soon".
-
 This is the first time I've every open sourced anything I've worked on so be gentle ;-)
