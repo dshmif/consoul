@@ -59,13 +59,13 @@ public class AboutWidget implements Widget {
 		int contentLength =
 				this.determineContentWidth(content);
 		final int size = this.getBufferSize(contentLength);
-		StringBuilder sb = new StringBuilder(size);
-		String headerFooter = this.buildHeaderFooter(sb, contentLength);
-		for(String s : content) {
-			this.addContentElement(s, sb, contentLength);
+		StringBuilder contentBuffer = new StringBuilder(size);
+		String headerFooter = this.buildHeaderFooter(contentBuffer, contentLength);
+		for(String element : content) {
+			this.addContentElement(element, contentBuffer, contentLength);
 		}
-		sb.append(headerFooter);
-		stream.print(sb.toString());
+		contentBuffer.append(headerFooter);
+		stream.print(contentBuffer.toString());
 	}
 	
 	private String[] flattenMapInfo(Map<String,String> content) {
@@ -95,6 +95,14 @@ public class AboutWidget implements Widget {
 		return (contentLength + 5) * 4;
 	}
 	
+	/*
+	 * Odd helper method in that it adds the header to the content but
+	 * also returns the same header so that it can be used, without having
+	 * to rebuild it, as the footer. 
+	 * @param content
+	 * @param len
+	 * @return
+	 */
 	private String buildHeaderFooter(StringBuilder content, int len) {
 		content.append('+');
 		while( len > 0 ) {
