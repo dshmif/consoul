@@ -104,6 +104,8 @@ public class AboutWidget implements Widget {
 	 * @return
 	 */
 	private String buildHeaderFooter(StringBuilder content, int len) {
+		// Add 2 to the length for the bookend spaces for each content element
+		len += 2;
 		content.append('+');
 		while( len > 0 ) {
 			content.append('-');
@@ -115,7 +117,7 @@ public class AboutWidget implements Widget {
 	}
 	
 	private void addContentElement(String element, StringBuilder content, int len) {
-		content.append('|').append(" ").append(element);
+		content.append('|').append(' ').append(element).append(' ');
 		int elemLen = element.length();
 		if( elemLen < len) {
 			int spaces = len - elemLen;
