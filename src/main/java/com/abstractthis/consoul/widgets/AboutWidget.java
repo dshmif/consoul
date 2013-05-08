@@ -23,44 +23,76 @@ package com.abstractthis.consoul.widgets;
 //THE SOFTWARE.
 
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import com.abstractthis.consoul.ConsoleProperties;
 
 public class AboutWidget implements Widget {
 	private final String appNameInfo;
 	private final String appVersionInfo;
+	private final Map<String,String> info;
 	
 	public AboutWidget(String name, String version) {
 		if( name == null ) name = "";
 		if( version == null ) version = "";
-		this.appNameInfo = " Application: " + name + " ";
-		this.appVersionInfo = " Version: " + version + " ";
+		this.appNameInfo = "Application: " + name;
+		this.appVersionInfo = "Version: " + version;
+		info = null;
 	}
 	
 	public AboutWidget(ConsoleProperties props) {
 		this(props.getApplicationTitle(), props.getProperty("app.version"));
 	}
+	
+	public AboutWidget(Map<String,String> aboutInfo) {
+		this.appNameInfo = null;
+		this.appVersionInfo = null;
+		this.info = new HashMap<String,String>(aboutInfo);
+	}
 
 	public void render(PrintStream stream) {
-		int nameLength = appNameInfo.length();
-		int versionLength = appVersionInfo.length();
-		StringBuilder sb;
-		if( nameLength > versionLength ) {
-			// plus 3 for the bookend chars and the '\n'
-			sb = new StringBuilder((nameLength + 3) * 4);
-			String headerFooter = this.buildHeaderFooter(sb, nameLength);
-			this.addNameInfo(sb, nameLength);
-			this.addVersionInfo(sb, nameLength);
-			sb.append(headerFooter);
+		String[] content = this.info == null ?
+				new String[] {this.appNameInfo, this.appVersionInfo} :
+					this.flattenMapInfo(this.info); 
+		int contentLength =
+				this.determineContentWidth(content);
+		final int size = this.getBufferSize(contentLength);
+		StringBuilder sb = new StringBuilder(size);
+		String headerFooter = this.buildHeaderFooter(sb, contentLength);
+		for(String s : content) {
+			this.addContentElement(s, sb, contentLength);
 		}
-		else {
-			sb = new StringBuilder((versionLength + 3) * 4);
-			String headerFooter = this.buildHeaderFooter(sb, versionLength);
-			this.addNameInfo(sb, versionLength);
-			this.addVersionInfo(sb, versionLength);
-			sb.append(headerFooter);
-		}
+		sb.append(headerFooter);
 		stream.print(sb.toString());
+	}
+	
+	private String[] flattenMapInfo(Map<String,String> content) {
+		Set<Map.Entry<String,String>> contentSet = this.info.entrySet();
+		String[] flatContent = new String[contentSet.size()];
+		int i = 0;
+		for(Map.Entry<String, String> e : contentSet) {
+			String s = String.format("%s: %s", e.getKey(), e.getValue());
+			flatContent[i++] = s;
+		}
+		return flatContent;
+	}
+	
+	private int determineContentWidth(String[] content) {
+		int width = 0;
+		for(String s : content) {
+			int strLength = s.length();
+			if( strLength > width ) {
+				width = strLength;
+			}
+		}
+		return width;
+	}
+	
+	private int getBufferSize(int contentLength) {
+		// plus 5 for the bookend chars and the '\n'
+		return (contentLength + 5) * 4;
 	}
 	
 	private String buildHeaderFooter(StringBuilder content, int len) {
@@ -74,34 +106,17 @@ public class AboutWidget implements Widget {
 		return content.toString();
 	}
 	
-	private void addNameInfo(StringBuilder content, int len) {
-		content.append('|');
-		content.append(this.appNameInfo);
-		int infoLen = this.appNameInfo.length();
-		if( infoLen < len) {
-			int spaces = len - infoLen;
+	private void addContentElement(String element, StringBuilder content, int len) {
+		content.append('|').append(" ").append(element);
+		int elemLen = element.length();
+		if( elemLen < len) {
+			int spaces = len - elemLen;
 			while( spaces > 0 ) {
 				content.append(' ');
 				spaces--;
 			}
 		}
-		content.append('|')
-		       .append('\n');
-	}
-	
-	private void addVersionInfo(StringBuilder content, int len) {
-		content.append('|');
-		content.append(this.appVersionInfo);
-		int infoLen = this.appVersionInfo.length();
-		if( infoLen < len) {
-			int spaces = len - infoLen;
-			while( spaces > 0 ) {
-				content.append(' ');
-				spaces--;
-			}
-		}
-		content.append('|')
-		       .append('\n');
+		content.append('|').append('\n');
 	}
 
 }
